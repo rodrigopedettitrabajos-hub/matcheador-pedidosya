@@ -176,6 +176,7 @@ dialog::backdrop { background: rgba(43, 15, 58, .45); }
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const plata = n => n === null || n === "" || n === undefined ? "" : "$ " + Number(n).toLocaleString("es-UY");
+const LEYENDA = "Se recomienda crearlo en HIOPOS e importar las planillas nuevamente.";
 const ETIQUETA = { ok: "Listo", revisar: "Revisar", "sin match": "Sin match", manual: "Confirmado" };
 const CLASE = { ok: "ok", revisar: "revisar", "sin match": "sin", manual: "manual" };
 
@@ -262,7 +263,7 @@ function ticket(x, clave, soloLectura) {
   const h = porCod[x.cod];
   const cls = CLASE[x.estado] + (recien === clave ? " recien" : "");
   const hi = h ? `<b>${esc(h.nombre)}</b><small>Familia ${esc(h.familia)}${h.precio !== "" && h.precio != null ? ", precio HIOPOS " + plata(h.precio) : ""}</small>`
-               : `<b>Sin artículo de HIOPOS</b><small>${x.previo ? `Traía "${esc(x.previo)}", que no existe en HIOPOS. ` : ""}Se recomienda crearlo en HIOPOS e importar las planillas nuevamente.</small>`;
+               : `<b>Sin artículo de HIOPOS</b><small>${x.previo ? `Traía "${esc(x.previo)}", que no existe en HIOPOS. ` : ""}${LEYENDA}</small>`;
   const acc = soloLectura ? "" : `<div class="acciones">
       ${x.estado === "revisar" ? `<button class="btn btn-rojo" data-confirmar="${clave}">Confirmar</button>` : ""}
       <button class="btn btn-borde" data-cambiar="${clave}">${x.cod ? "Cambiar" : "Elegir"}</button></div>`;
@@ -356,9 +357,13 @@ function descargar() {
   for (const p of prods) P[p.fila][cP] = p.cod;
   const O = archivos.opcionales.filas.map(r => [...r]), cSP = col(O, "SKU Producto"), cS = col(O, "SKU");
   for (const o of opcs) { O[o.fila][cSP] = prodDe(o.idProd)?.cod ?? null; O[o.fila][cS] = o.cod; }
+  // Celdas sin código: comentario con la leyenda, para que se vea también en la planilla descargada
+  const sinCod = [...prods.filter(p => !p.cod).map(p => [P, p.fila, cP]), ...opcs.flatMap(o => [
+    ...(o.cod ? [] : [[O, o.fila, cS]]), ...(prodDe(o.idProd)?.cod ? [] : [[O, o.fila, cSP]])])];
   for (const [filas, a] of [[P, archivos.productos], [O, archivos.opcionales]]) {
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(filas), a.hoja);
+    const wb = XLSX.utils.book_new(), ws = XLSX.utils.aoa_to_sheet(filas);
+    for (const [f, r, c] of sinCod) if (f === filas) ws[XLSX.utils.encode_cell({ r, c })] = { t: "z", c: [{ a: "Matcheador", t: `Sin artículo de HIOPOS. ${LEYENDA}` }] };
+    XLSX.utils.book_append_sheet(wb, ws, a.hoja);
     XLSX.writeFile(wb, a.nombre.replace(/\.xls$/i, ".xlsx"));
   }
 }
