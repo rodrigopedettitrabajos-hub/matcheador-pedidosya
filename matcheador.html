@@ -256,7 +256,7 @@ function ticket(x, clave, soloLectura) {
   const h = porCod[x.cod];
   const cls = CLASE[x.estado] + (recien === clave ? " recien" : "");
   const hi = h ? `<b>${esc(h.nombre)}</b><small>Familia ${esc(h.familia)}${h.precio !== "" && h.precio != null ? ", precio HIOPOS " + plata(h.precio) : ""}</small>`
-               : `<b>Sin artículo de HIOPOS</b><small>${x.previo ? `Traía "${esc(x.previo)}", que no existe en HIOPOS` : "Elegí uno a mano"}</small>`;
+               : `<b>Sin artículo de HIOPOS</b><small>${x.previo ? `Traía "${esc(x.previo)}", que no existe en HIOPOS. ` : ""}Se recomienda crearlo en HIOPOS e importar las planillas nuevamente.</small>`;
   const acc = soloLectura ? "" : `<div class="acciones">
       ${x.estado === "revisar" ? `<button class="btn btn-rojo" data-confirmar="${clave}">Confirmar</button>` : ""}
       <button class="btn btn-borde" data-cambiar="${clave}">${x.cod ? "Cambiar" : "Elegir"}</button></div>`;
