@@ -10,5 +10,5 @@ if not defined PY (
 )
 "%PY%" -c "import openpyxl" 2>nul || "%PY%" -m pip install openpyxl
 cd /d "%~dp0"
-"%PY%" matcheador.py
+"%PY%" codigo\matcheador.py
 pause
