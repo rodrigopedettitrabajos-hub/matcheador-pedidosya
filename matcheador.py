@@ -16,6 +16,7 @@ BASE = Path(__file__).parent
 AMARILLO = PatternFill("solid", fgColor="FFFF00")
 ROJO = PatternFill("solid", fgColor="FF8080")
 OK_MIN, REVISAR_MIN, EMPATE, BONO_PEDIDOYA = 0.9, 0.6, 0.03, 0.1
+LEYENDA = "Se recomienda crearlo en HIOPOS e importar las planillas nuevamente."
 
 # Variantes de escritura que se ven en PedidosYa / HIOPOS
 SINONIMOS = {"BROASTER": "BROSTER", "MUZLO": "MUSLO", "MARIANADA": "MARINADA", "MOZTAZA": "MOSTAZA",
@@ -86,7 +87,7 @@ def completar(celda, nombre, hiopos, codigos, cache):
         celda.fill = AMARILLO if cod else ROJO
         previo = f"Tenía '{actual}' (no existe en HIOPOS).\n" if actual else ""
         if not cod:
-            previo += "Se recomienda crearlo en HIOPOS e importar las planillas nuevamente.\n"
+            previo += LEYENDA + "\n"
         celda.comment = Comment(f"{previo}Candidatos:\n{candidatos}", "matcheador", width=320, height=110)
     return estado
 
@@ -125,6 +126,8 @@ def procesar(hiopos, ruta_prod, ruta_opc, salida):
         celda_prod.value = sku_prod
         if estado_prod != "ok":  # hereda la duda del producto
             celda_prod.fill = AMARILLO if sku_prod else ROJO
+            if not sku_prod:
+                celda_prod.comment = Comment(f"El producto no tiene artículo de HIOPOS. {LEYENDA}", "matcheador", width=320, height=60)
         estado = completar(ws.cell(fila, c["SKU"]), nombre, hiopos, codigos, cache)
         resumen.setdefault(("opcionales", estado), []).append(nombre)
     wb.save(salida / ruta_opc.name)
@@ -140,6 +143,8 @@ def main():
     resumen = procesar(hiopos, next(recibidos.glob("productos-*.xlsx")), next(recibidos.glob("opcionales-*.xlsx")), salida)
     for (hoja, estado), nombres in sorted(resumen.items()):
         print(f"{hoja:10} {estado:9} {len(nombres):3}" + ("" if estado == "ok" else "  " + ", ".join(sorted(set(nombres)))))
+    if any(estado == "sin match" for _, estado in resumen):
+        print(f"\nSin match: {LEYENDA}")
     print(f"\nListo -> {salida}")
 
 
