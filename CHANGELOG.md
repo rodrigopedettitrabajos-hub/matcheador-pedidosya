@@ -2,6 +2,10 @@
 
 Cada cambio que se publica suma una versión arriba de todo. La primera línea `## X.Y.Z` es la versión que muestra la app y la que se etiqueta en git.
 
+## 1.3.2 — 2026-11-13
+- "¿Cómo funciona?" pasa a la derecha, como botón, con letra más grande.
+- El tutorial muestra capturas de cada paso, hechas con una tienda inventada.
+
 ## 1.3.1 — 2026-11-13
 - Carpeta más ordenada: el código va en `codigo/` y las planillas de clientes en `planillas/`.
 
