@@ -61,17 +61,20 @@ Para casos que no reconoce, agregar variantes en `SINONIMOS` / `RELLENO`.
 
 | Archivo | Qué es |
 |---|---|
-| `matcheador.html` + `matcher.js` | Pantalla (fuente). |
-| `empaquetar.py` | Arma `Para tecnicos/Matcheador.html` incrustando `matcher.js`, `vendor/xlsx.full.min.js` (SheetJS 0.18.5) y las novedades de `CHANGELOG.md`. Correrlo tras cada cambio. |
+| `Para tecnicos/Matcheador.html` | La herramienta lista para usar (se genera, no editar). |
 | `CHANGELOG.md` | Versiones y novedades. |
-| `matcheador.py` + `ejecutar.bat` | Versión por consola: lee `Recibidos PYA/` y `Listado HIOPOS/`, escribe en `Salida/`. |
-| `test_matcheador.py` | Compara la salida contra `Enviados PYA/` (lo que se envió a mano). |
-| `test_logica.py` | Pruebas de la lógica con datos inventados: `python -m unittest test_logica`. |
-| `test_matcher.js` | Verifica que `matcher.js` y `matcheador.py` den lo mismo. |
-| `docs/Presentacion Matcheador.pdf` | Presentación de la herramienta. Se genera desde `docs/presentacion.html` imprimiéndolo con Edge/Chrome (`msedge --headless --print-to-pdf=... presentacion.html`). |
+| `ejecutar.bat` | Versión por consola: lee `planillas/Recibidos PYA/` y `planillas/Listado HIOPOS/`, escribe en `planillas/Salida/`. |
+| `planillas/` | Planillas de clientes para la consola y los tests. No se suben al repo y se pueden borrar cuando quieras. |
+| `docs/` | Presentación (`Presentacion Matcheador.pdf`, se genera desde `presentacion.html` imprimiéndolo con Edge/Chrome) y capturas. |
+| `codigo/matcheador.html` + `codigo/matcher.js` | Pantalla (fuente). |
+| `codigo/empaquetar.py` | Arma `Para tecnicos/Matcheador.html` incrustando `matcher.js`, `vendor/xlsx.full.min.js` (SheetJS 0.18.5) y las novedades de `CHANGELOG.md`. Correrlo tras cada cambio. |
+| `codigo/matcheador.py` | Lógica de la consola. |
+| `codigo/test_matcheador.py` | Compara la salida contra `planillas/Enviados PYA/` (lo que se envió a mano). |
+| `codigo/test_logica.py` | Pruebas de la lógica con datos inventados: `cd codigo` y `python -m unittest test_logica`. |
+| `codigo/test_matcher.js` | Verifica que `matcher.js` y `matcheador.py` den lo mismo. |
 
-**Las reglas viven en dos lugares** (`matcher.js` y `matcheador.py`): si cambiás una, cambiá la otra y corré `node test_matcher.js`.
+**Las reglas viven en dos lugares** (`matcher.js` y `matcheador.py`): si cambiás una, cambiá la otra y corré `node codigo/test_matcher.js`.
 
-Las planillas de clientes no están en el repo (`.gitignore`). Para correr los tests, poné una tienda de ejemplo en `Recibidos PYA/`, `Enviados PYA/` y `Listado HIOPOS/`.
+Las planillas de clientes no están en el repo (`.gitignore`). Para correr los tests, poné una tienda de ejemplo en `planillas/Recibidos PYA/`, `planillas/Enviados PYA/` y `planillas/Listado HIOPOS/`.
 
 Requisitos para desarrollar: Python 3 con `openpyxl`, y Node.
