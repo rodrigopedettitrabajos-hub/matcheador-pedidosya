@@ -2,6 +2,13 @@
 
 Cada cambio que se publica suma una versión arriba de todo. La primera línea `## X.Y.Z` es la versión que muestra la app y la que se etiqueta en git.
 
+## 1.4.0 — 2026-11-13
+- "¿Cómo funciona?" se puede ampliar a pantalla completa, con letra más grande.
+- Más seguro: una medida distinta ("600 ml" contra "1.5 L") ya no queda en verde.
+- Un parecido a medias ya no queda en verde solo por ser de la familia PEDIDOYA: pasa a Revisar.
+- Si HIOPOS tiene el mismo código repetido y otro artículo igual, ahora avisa el empate.
+- Carga más rápida con cartas grandes.
+
 ## 1.3.2 — 2026-11-13
 - "¿Cómo funciona?" pasa a la derecha, como botón, con letra más grande.
 - El tutorial muestra capturas de cada paso, hechas con una tienda inventada.

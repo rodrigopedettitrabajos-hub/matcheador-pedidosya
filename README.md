@@ -53,7 +53,7 @@ Para sacar una versión nueva: agregá arriba de todo en `CHANGELOG.md` un `## X
 
 ## Cómo matchea
 
-Compara nombres palabra por palabra, ignorando acentos, mayúsculas, medidas ("600 g") y relleno ("más", "con", "para"), y tolera faltas de ortografía. Ante empate prefiere la familia `PEDIDOYA` y después el código más bajo. Los SKU que ya existen en HIOPOS se respetan. El `SKU Producto` de los opcionales se toma del producto.
+Compara nombres palabra por palabra, ignorando acentos, mayúsculas y relleno ("más", "con", "para"), y tolera faltas de ortografía. Las medidas ("600 g") no cuentan si HIOPOS no las tiene, pero si los dos nombres tienen medida y es distinta, no es el mismo artículo. Ante empate prefiere la familia `PEDIDOYA` y después el código más bajo; esa preferencia ordena, pero no alcanza para dar un match por bueno. Los SKU que ya existen en HIOPOS se respetan. El `SKU Producto` de los opcionales se toma del producto.
 
 Para casos que no reconoce, agregar variantes en `SINONIMOS` / `RELLENO`.
 
@@ -71,6 +71,7 @@ Para casos que no reconoce, agregar variantes en `SINONIMOS` / `RELLENO`.
 | `codigo/matcheador.py` | Lógica de la consola. |
 | `codigo/test_matcheador.py` | Compara la salida contra `planillas/Enviados PYA/` (lo que se envió a mano). |
 | `codigo/test_logica.py` | Pruebas de la lógica con datos inventados: `cd codigo` y `python -m unittest test_logica`. |
+| `codigo/test_logica.js` | Los mismos casos contra `matcher.js` (lo que usa la pantalla): `node codigo/test_logica.js`. Corre solo antes de cada publicación. |
 | `codigo/test_matcher.js` | Verifica que `matcher.js` y `matcheador.py` den lo mismo. |
 
 **Las reglas viven en dos lugares** (`matcher.js` y `matcheador.py`): si cambiás una, cambiá la otra y corré `node codigo/test_matcher.js`.

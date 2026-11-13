@@ -7,10 +7,12 @@ const RELLENO = new Set(["MAS", "Y", "CON", "DE", "LA", "EL", "O", "X", "PARA", 
 
 function normalizar(texto) {
   let t = String(texto ?? "").normalize("NFKD").replace(/[^\x00-\x7F]/g, "").toUpperCase();
-  t = t.replace(/\d+(\.\d+)?\s*(G|GR|GRS|ML|CC|L|LT|LTS)\b/g, " ");
+  // Medidas aparte, como "=600": si las dos tienen y no coinciden, no es el mismo artículo
+  const medidas = [...t.matchAll(/(\d+(?:[.,]\d+)?)\s*(?:G|GR|GRS|ML|CC|L|LT|LTS)\b/g)].map(m => "=" + m[1].replace(",", "."));
+  t = t.replace(/\d+([.,]\d+)?\s*(G|GR|GRS|ML|CC|L|LT|LTS)\b/g, " ");
   t = t.replace(/(\d)([A-Z])|([A-Z])(\d)/g, (m, a, b, c, d) => a ? `${a} ${b}` : `${c} ${d}`);
   const palabras = (t.match(/[A-Z0-9]+/g) || []).map(p => SINONIMOS[p] || p).filter(p => !RELLENO.has(p));
-  return [...new Set(palabras)];
+  return [...new Set([...palabras, ...medidas])];
 }
 
 // Caracteres en común al estilo difflib.SequenceMatcher
@@ -30,6 +32,9 @@ function iguales(a, b) {
 }
 
 function similitud(a, b) {
+  const ma = a.filter(p => p[0] === "="), mb = b.filter(p => p[0] === "=");
+  if (ma.length && mb.length && !ma.some(p => mb.includes(p))) return 0;
+  a = a.filter(p => p[0] !== "="); b = b.filter(p => p[0] !== "=");
   const libres = [...b];
   let comunes = 0;
   for (const p of a) {
@@ -43,15 +48,16 @@ const numCod = h => parseInt(h.cod.split("-")[0], 10) || 0;
 
 function ranking(nombre, hiopos) {
   const tok = normalizar(nombre);
-  return hiopos.map(h => ({ h, p: similitud(tok, h.tokens) + (h.familia === "PEDIDOYA" ? BONO_PEDIDOYA : 0) }))
+  // El bonus PEDIDOYA ordena y desempata (p); el estado se decide con el parecido sin bonus (s)
+  return hiopos.map(h => { const s = similitud(tok, h.tokens); return { h, s, p: s + (h.familia === "PEDIDOYA" ? BONO_PEDIDOYA : 0) }; })
     .sort((x, y) => y.p - x.p || numCod(x.h) - numCod(y.h));
 }
 
 function buscar(nombre, hiopos) {
   const r = ranking(nombre, hiopos);
-  const [a, b] = r;
-  const empatado = b && a.p - b.p <= EMPATE && b.h.cod !== a.h.cod;
-  const estado = a.p >= OK_MIN && !empatado ? "ok" : a.p >= REVISAR_MIN ? "revisar" : "sin match";
+  const a = r[0], b = r.find(x => x.h.cod !== a.h.cod);  // un código repetido no tapa un empate
+  const empatado = b && a.p - b.p <= EMPATE;
+  const estado = a.s >= OK_MIN && !empatado ? "ok" : a.s >= REVISAR_MIN ? "revisar" : "sin match";
   return { cod: estado === "sin match" ? null : a.h.cod, estado, candidatos: r.slice(0, 3) };
 }
 
