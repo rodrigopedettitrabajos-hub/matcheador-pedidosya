@@ -2,6 +2,9 @@
 
 Cada cambio que se publica suma una versión arriba de todo. La primera línea `## X.Y.Z` es la versión que muestra la app y la que se etiqueta en git.
 
+## 1.3.1 — 2026-11-13
+- Carpeta más ordenada: el código va en `codigo/` y las planillas de clientes en `planillas/`.
+
 ## 1.3.0 — 2026-11-13
 - Botón "¿Cómo funciona?" con el tutorial de uso.
 
