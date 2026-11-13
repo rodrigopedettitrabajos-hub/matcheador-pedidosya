@@ -22,7 +22,7 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - run: python3 empaquetar.py
+      - run: python3 codigo/empaquetar.py
       - run: mkdir _site && cp "Para tecnicos/Matcheador.html" _site/index.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

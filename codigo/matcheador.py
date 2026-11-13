@@ -1,8 +1,8 @@
 """Rellena los SKU de las planillas de PedidosYa con los códigos del listado HIOPOS.
 
-Uso: python matcheador.py
-Lee "Recibidos PYA/productos-*.xlsx" y "opcionales-*.xlsx", el primer archivo de "Listado HIOPOS"
-y escribe las planillas completas en "Salida/".
+Uso: python codigo/matcheador.py  (o doble clic en ejecutar.bat)
+Lee "planillas/Recibidos PYA/productos-*.xlsx" y "opcionales-*.xlsx", el primer archivo de "planillas/Listado HIOPOS"
+y escribe las planillas completas en "planillas/Salida/".
 Celdas amarillas = revisar (match dudoso o con varios candidatos, ver comentario). Rojas = sin match.
 """
 import re, sys, unicodedata
@@ -12,7 +12,7 @@ import openpyxl
 from openpyxl.comments import Comment
 from openpyxl.styles import PatternFill
 
-BASE = Path(__file__).parent
+BASE = Path(__file__).parent.parent / "planillas"  # Recibidos PYA, Listado HIOPOS, Salida, Enviados PYA
 AMARILLO = PatternFill("solid", fgColor="FFFF00")
 ROJO = PatternFill("solid", fgColor="FF8080")
 OK_MIN, REVISAR_MIN, EMPATE, BONO_PEDIDOYA = 0.9, 0.6, 0.03, 0.1
