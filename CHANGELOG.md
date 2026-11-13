@@ -2,6 +2,9 @@
 
 Cada cambio que se publica suma una versión arriba de todo. La primera línea `## X.Y.Z` es la versión que muestra la app y la que se etiqueta en git.
 
+## 1.3.0 — 2026-11-13
+- Botón "¿Cómo funciona?" con el tutorial de uso.
+
 ## 1.2.0 — 2026-11-13
 - La herramienta se puede abrir desde la web, sin pasar el archivo.
 - Número de versión y panel de Novedades en la pantalla.

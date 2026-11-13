@@ -29,6 +29,7 @@ header { background: var(--rojo); color: #fff; position: sticky; top: 0; z-index
 .novedades > div { position: absolute; z-index: 10; top: 28px; left: 0; width: min(340px, 85vw); max-height: 60vh; overflow: auto; background: #fff; color: var(--tinta); border-radius: 12px; padding: 4px 16px; box-shadow: 0 8px 24px rgba(0,0,0,.18); }
 .novedades h3 { font-size: 14px; margin: 12px 0 4px; }
 .novedades ul { margin: 0; padding-left: 18px; }
+.novedades p { margin: 0 0 8px; }
 .btn { border: 0; border-radius: 999px; padding: 9px 18px; font-weight: 700; cursor: pointer; }
 .btn-blanco { background: #fff; color: var(--rojo); }
 .btn-blanco:hover { background: #FFE3EC; }
@@ -128,6 +129,18 @@ dialog::backdrop { background: rgba(43, 15, 58, .45); }
   <div class="barra">
     <h1>Matcheador PYA–HIOPOS</h1>
     <!--NOVEDADES-->
+    <details class="novedades"><summary>¿Cómo funciona?</summary><div>
+      <h3>1. Soltá las planillas</h3><p>Arrastrá las tres juntas: <b>productos</b> y <b>opcionales</b> de PedidosYa, y el <b>listado de HIOPOS</b>. Las reconoce por su contenido, no por el nombre. No se suben a ningún lado.</p>
+      <h3>2. Revisá por colores</h3><ul>
+        <li><b>Verde · Listo:</b> match seguro, no hay que tocar nada.</li>
+        <li><b>Amarillo · Revisar:</b> hay más de un candidato, tocá Confirmar o Cambiar.</li>
+        <li><b>Rojo · Sin match:</b> no hay nada parecido en HIOPOS. Se recomienda crearlo en HIOPOS e importar las planillas nuevamente.</li>
+        <li><b>Violeta · Confirmado:</b> lo elegiste o confirmaste vos.</li></ul>
+      <p>Solo hay que detenerse en lo amarillo y lo rojo.</p>
+      <h3>3. Cambiá el artículo</h3><p><b>Cambiar</b> o <b>Elegir</b> abre el listado de HIOPOS ordenado por parecido, con buscador por nombre, código o familia. Si no existe, usá <b>Dejar sin código</b>.</p>
+      <h3>4. Revisá los opcionales</h3><p>Están agrupados por producto. Cada opcional se elige una vez: corregir "Mayonesa" corrige todas las de la carta.</p>
+      <h3>5. Descargá</h3><p>Tocá <b>Descargar planillas</b> y enviá a PedidosYa los dos archivos con los SKU completos.</p>
+    </div></details>
     <span class="tienda" id="tienda"></span>
     <span class="espacio"></span>
     <button class="btn btn-blanco" id="descargar" hidden>Descargar planillas</button>
