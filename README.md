@@ -26,6 +26,7 @@ Para casos que no reconoce, agregar variantes en `SINONIMOS` / `RELLENO`.
 | `empaquetar.py` | Arma `Para tecnicos/Matcheador.html` incrustando `matcher.js` y `vendor/xlsx.full.min.js` (SheetJS 0.18.5). Correrlo tras cada cambio. |
 | `matcheador.py` + `ejecutar.bat` | Versión por consola: lee `Recibidos PYA/` y `Listado HIOPOS/`, escribe en `Salida/`. |
 | `test_matcheador.py` | Compara la salida contra `Enviados PYA/` (lo que se envió a mano). |
+| `test_logica.py` | Pruebas de la lógica con datos inventados: `python -m unittest test_logica`. |
 | `test_matcher.js` | Verifica que `matcher.js` y `matcheador.py` den lo mismo. |
 | `docs/Presentacion Matcheador.pdf` | Presentación de la herramienta. Se genera desde `docs/presentacion.html` imprimiéndolo con Edge/Chrome (`msedge --headless --print-to-pdf=... presentacion.html`). |
 
