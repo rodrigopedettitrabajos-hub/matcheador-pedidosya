@@ -1,0 +1,36 @@
+# Publica la herramienta en GitHub Pages en cada cambio a main, y etiqueta la versión de CHANGELOG.md.
+name: Publicar
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write   # crear la etiqueta vX.Y.Z
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 empaquetar.py
+      - run: mkdir _site && cp "Para tecnicos/Matcheador.html" _site/index.html
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+      - id: deploy
+        uses: actions/deploy-pages@v4
+      - name: Etiquetar versión
+        run: |
+          v="v$(grep -m1 '^## ' CHANGELOG.md | cut -d' ' -f2)"
+          if ! git ls-remote --exit-code --tags origin "$v" >/dev/null; then
+            git tag "$v" && git push origin "$v"
+          fi
