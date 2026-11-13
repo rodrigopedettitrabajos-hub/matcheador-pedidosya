@@ -85,6 +85,8 @@ def completar(celda, nombre, hiopos, codigos, cache):
     if estado != "ok":
         celda.fill = AMARILLO if cod else ROJO
         previo = f"Tenía '{actual}' (no existe en HIOPOS).\n" if actual else ""
+        if not cod:
+            previo += "Se recomienda crearlo en HIOPOS e importar las planillas nuevamente.\n"
         celda.comment = Comment(f"{previo}Candidatos:\n{candidatos}", "matcheador", width=320, height=110)
     return estado
 
