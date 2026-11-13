@@ -1,5 +1,6 @@
 """Arma "Para tecnicos/Matcheador.html": un solo archivo con todo adentro, para pasar a los técnicos.
 Correr después de cambiar matcheador.html o matcher.js:  python codigo/empaquetar.py"""
+import base64
 import html as h
 import re
 from pathlib import Path
@@ -34,6 +35,9 @@ assert "<!--NOVEDADES-->" in html, "Falta <!--NOVEDADES--> en matcheador.html"
 html = html.replace("<!--NOVEDADES-->", panel)
 html, n = re.subn(r'<script src="([^"]+)"></script>', incrustar, html)
 assert n == 2, f"Esperaba 2 scripts locales (SheetJS y matcher.js), encontré {n}"
+# Capturas del "¿Cómo funciona?": se incrustan para que el archivo funcione solo
+html = re.sub(r'src="\.\./docs/img/([^"]+)\.jpg"', lambda m: 'src="data:image/jpeg;base64,'
+              + base64.b64encode((RAIZ / "docs" / "img" / f"{m.group(1)}.jpg").read_bytes()).decode() + '"', html)
 salida = RAIZ / "Para tecnicos" / "Matcheador.html"
 salida.parent.mkdir(exist_ok=True)
 salida.write_text(html, encoding="utf-8")
