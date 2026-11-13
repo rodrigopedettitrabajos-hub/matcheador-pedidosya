@@ -27,10 +27,12 @@ RELLENO = {"MAS", "Y", "CON", "DE", "LA", "EL", "O", "X", "PARA", "COLA", "ORIGI
 
 def normalizar(texto):
     t = unicodedata.normalize("NFKD", str(texto or "")).encode("ascii", "ignore").decode().upper()
-    t = re.sub(r"\d+(\.\d+)?\s*(G|GR|GRS|ML|CC|L|LT|LTS)\b", " ", t)  # medidas: HIOPOS casi nunca las tiene
+    # Medidas aparte, como "=600": HIOPOS casi nunca las tiene, pero si las dos tienen y no coinciden, no es el mismo
+    medidas = ["=" + m.replace(",", ".") for m in re.findall(r"(\d+(?:[.,]\d+)?)\s*(?:G|GR|GRS|ML|CC|L|LT|LTS)\b", t)]
+    t = re.sub(r"\d+([.,]\d+)?\s*(G|GR|GRS|ML|CC|L|LT|LTS)\b", " ", t)
     t = re.sub(r"(\d)([A-Z])|([A-Z])(\d)", r"\1\3 \2\4", t)  # X6 -> X 6
     palabras = [SINONIMOS.get(p, p) for p in re.findall(r"[A-Z0-9]+", t)]
-    return list(dict.fromkeys(p for p in palabras if p not in RELLENO))
+    return list(dict.fromkeys([p for p in palabras if p not in RELLENO] + medidas))
 
 
 def iguales(a, b):
@@ -38,7 +40,11 @@ def iguales(a, b):
 
 
 def similitud(a, b):
-    """Palabras en común (con tolerancia a errores) sobre el total: 1.0 = mismas palabras."""
+    """Palabras en común (con tolerancia a errores) sobre el total: 1.0 = mismas palabras. Medidas distintas = 0."""
+    ma, mb = {p for p in a if p[0] == "="}, {p for p in b if p[0] == "="}
+    if ma and mb and not ma & mb:
+        return 0
+    a, b = [p for p in a if p[0] != "="], [p for p in b if p[0] != "="]
     libres, comunes = list(b), 0
     for p in a:
         par = next((q for q in libres if iguales(p, q)), None)
@@ -57,20 +63,27 @@ def leer_hiopos(ruta):
              "tokens": normalizar(r[i_nom])} for r in filas[1:] if r[i_cod]]
 
 
+def num_cod(cod):
+    """Número del código para desempatar, como parseInt de matcher.js: '12A-3' -> 12."""
+    m = re.match(r"\d+", cod)
+    return int(m[0]) if m else 0
+
+
 def buscar(nombre, hiopos):
     """Devuelve (codigo o None, estado 'ok'|'revisar'|'sin match', texto de candidatos)."""
     tok = normalizar(nombre)
-    # Los artículos armados para la integración viven en la familia PEDIDOYA; a igualdad, el código más bajo
-    puntaje = lambda h: similitud(tok, h["tokens"]) + (BONO_PEDIDOYA if h["familia"] == "PEDIDOYA" else 0)
-    ranking = sorted(hiopos, key=lambda h: (-puntaje(h), int(h["cod"].split("-")[0]) if h["cod"].split("-")[0].isdigit() else 0))
-    puntajes = [puntaje(h) for h in ranking[:3]]
-    candidatos = "\n".join(f"{h['cod']} {h['nombre']} [{h['familia']}] {p:.0%}" for h, p in zip(ranking, puntajes))
-    mejor = puntajes[0]
-    empatado = len(puntajes) > 1 and mejor - puntajes[1] <= EMPATE and ranking[1]["cod"] != ranking[0]["cod"]
-    if mejor >= OK_MIN and not empatado:
-        return ranking[0]["cod"], "ok", candidatos
-    if mejor >= REVISAR_MIN:
-        return ranking[0]["cod"], "revisar", candidatos
+    # Los artículos armados para la integración viven en la familia PEDIDOYA: el bonus ordena y desempata,
+    # pero el estado se decide con el parecido sin bonus. A igualdad, el código más bajo.
+    filas = [(h, s, s + (BONO_PEDIDOYA if h["familia"] == "PEDIDOYA" else 0)) for h in hiopos for s in [similitud(tok, h["tokens"])]]
+    filas.sort(key=lambda f: (-f[2], num_cod(f[0]["cod"])))
+    candidatos = "\n".join(f"{h['cod']} {h['nombre']} [{h['familia']}] {p:.0%}" for h, _, p in filas[:3])
+    mejor, parecido, puntaje = filas[0]
+    otro = next((f for f in filas if f[0]["cod"] != mejor["cod"]), None)  # un código repetido no tapa un empate
+    empatado = otro is not None and puntaje - otro[2] <= EMPATE
+    if parecido >= OK_MIN and not empatado:
+        return mejor["cod"], "ok", candidatos
+    if parecido >= REVISAR_MIN:
+        return mejor["cod"], "revisar", candidatos
     return None, "sin match", candidatos
 
 
@@ -134,13 +147,22 @@ def procesar(hiopos, ruta_prod, ruta_opc, salida):
     return resumen
 
 
+def uno(carpeta, patron):
+    """El único archivo de la carpeta que cumple el patrón; si hay 0 o varios, avisa y sale."""
+    archivos = sorted(carpeta.glob(patron))
+    if len(archivos) != 1:
+        hay = ", ".join(a.name for a in archivos) or "ninguno"
+        sys.exit(f"En '{carpeta}' tiene que haber un solo archivo {patron} (hay: {hay}).")
+    return archivos[0]
+
+
 def main():
     sys.stdout.reconfigure(encoding="utf-8")
     recibidos = BASE / "Recibidos PYA"
-    hiopos = leer_hiopos(next((BASE / "Listado HIOPOS").glob("*.xls*")))
+    hiopos = leer_hiopos(uno(BASE / "Listado HIOPOS", "*.xls*"))
     salida = BASE / "Salida"
     salida.mkdir(exist_ok=True)
-    resumen = procesar(hiopos, next(recibidos.glob("productos-*.xlsx")), next(recibidos.glob("opcionales-*.xlsx")), salida)
+    resumen = procesar(hiopos, uno(recibidos, "productos-*.xlsx"), uno(recibidos, "opcionales-*.xlsx"), salida)
     for (hoja, estado), nombres in sorted(resumen.items()):
         print(f"{hoja:10} {estado:9} {len(nombres):3}" + ("" if estado == "ok" else "  " + ", ".join(sorted(set(nombres)))))
     if any(estado == "sin match" for _, estado in resumen):

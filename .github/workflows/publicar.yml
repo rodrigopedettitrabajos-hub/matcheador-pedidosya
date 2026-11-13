@@ -22,6 +22,8 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - name: Probar las reglas de la pantalla antes de publicar
+        run: node codigo/test_logica.js
       - run: python3 codigo/empaquetar.py
       - run: mkdir _site && cp "Para tecnicos/Matcheador.html" _site/index.html
       - uses: actions/configure-pages@v5

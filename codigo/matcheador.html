@@ -36,6 +36,12 @@ header { background: var(--rojo); color: #fff; position: sticky; top: 0; z-index
 .ayuda h3 { font-size: 16px; margin: 16px 0 6px; }
 .ayuda li { margin-bottom: 4px; }
 .ayuda img { display: block; width: 100%; border-radius: 8px; border: 1px solid #E8E2EC; margin: 8px 0 4px; }
+.ayuda .ampliar { position: sticky; top: 0; float: right; margin: 8px -8px 0 8px; z-index: 1; background: var(--fondo); border: 1px solid var(--linea); border-radius: 999px; padding: 5px 12px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.ayuda .ampliar:hover { background: var(--linea); }
+/* Ampliado: el tutorial ocupa toda la ventana, con letra grande */
+.ayuda.grande > div { position: fixed; inset: 0; width: auto; max-height: none; border-radius: 0; font-size: 20px; line-height: 1.6; padding: 24px max(24px, calc(50vw - 460px)) 48px; z-index: 50; }
+.ayuda.grande h3 { font-size: 26px; margin: 32px 0 10px; }
+.ayuda.grande .ampliar { float: none; display: block; margin: 0 0 0 auto; font-size: 16px; padding: 8px 18px; }
 .btn { border: 0; border-radius: 999px; padding: 9px 18px; font-weight: 700; cursor: pointer; }
 .btn-blanco { background: #fff; color: var(--rojo); }
 .btn-blanco:hover { background: #FFE3EC; }
@@ -138,7 +144,8 @@ dialog::backdrop { background: rgba(43, 15, 58, .45); }
     <span class="tienda" id="tienda"></span>
     <span class="espacio"></span>
     <button class="btn btn-blanco" id="descargar" hidden>Descargar planillas</button>
-    <details class="novedades ayuda"><summary>¿Cómo funciona?</summary><div>
+    <details class="novedades ayuda" id="ayuda"><summary>¿Cómo funciona?</summary><div>
+      <button type="button" class="ampliar" id="ampliar" aria-pressed="false">⤢ Ampliar</button>
       <h3>1. Soltá las planillas</h3><p>Arrastrá las tres juntas: <b>productos</b> y <b>opcionales</b> de PedidosYa, y el <b>listado de HIOPOS</b>. Las reconoce por su contenido, no por el nombre. No se suben a ningún lado.</p><img src="../docs/img/carga.jpg" alt="Pantalla de carga">
       <h3>2. Revisá por colores</h3><ul>
         <li><b>Verde · Listo:</b> match seguro, no hay que tocar nada.</li>
@@ -242,6 +249,7 @@ function arrancar() {
     hiopos = prepararHiopos(archivos.hiopos.filas);
   } catch (e) { $("#error").textContent = e.message; return; }
   porCod = Object.fromEntries(hiopos.map(h => [h.cod, h]));
+  yaBuscados.clear();
 
   const P = archivos.productos.filas, c = n => col(P, n);
   prods = P.slice(1).map((r, i) => ({ fila: i + 1, r })).filter(x => x.r[c("Nombre")]).map(({ fila, r }) => ({
@@ -260,10 +268,12 @@ function arrancar() {
   pintar();
 }
 
+const yaBuscados = new Map();   // la misma opción repetida en muchos productos se busca una sola vez
 function inicial(actual, nombre) {
   const a = actual ? String(actual).trim() : "";
   if (porCod[a]) return { cod: a, estado: "ok", previo: null };
-  const r = buscar(nombre, hiopos);
+  if (!yaBuscados.has(nombre)) yaBuscados.set(nombre, buscar(nombre, hiopos));
+  const r = yaBuscados.get(nombre);
   return { cod: r.cod, estado: r.estado, previo: a || null };
 }
 
@@ -410,6 +420,14 @@ $("#selLista").addEventListener("click", e => { const b = e.target.closest("[dat
 $("#selQuitar").addEventListener("click", () => { $("#selector").close(); asignar(editando, null); });
 $("#selCerrar").addEventListener("click", () => $("#selector").close());
 $("#descargar").addEventListener("click", descargar);
+const ampliar = grande => {
+  $("#ayuda").classList.toggle("grande", grande);
+  $("#ampliar").setAttribute("aria-pressed", grande);
+  $("#ampliar").textContent = grande ? "✕ Cerrar pantalla completa" : "⤢ Ampliar";
+};
+$("#ampliar").addEventListener("click", () => ampliar(!$("#ayuda").classList.contains("grande")));
+$("#ayuda").addEventListener("toggle", () => { if (!$("#ayuda").open) ampliar(false); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && $("#ayuda").classList.contains("grande")) ampliar(false); });
 pintarArchivos();
 </script>
 </body>

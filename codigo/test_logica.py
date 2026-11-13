@@ -64,6 +64,15 @@ class NombresDistintos(unittest.TestCase):
     def test_orden_de_palabras(self):
         self.assertOk("Mostaza salsa", "202")
 
+    def test_otra_medida_no_es_el_mismo(self):
+        filas = [("601", "COCA 600", "BEBIDAS"), ("602", "COCA 1.5 LTS", "BEBIDAS")]
+        self.assertNotEqual(m.buscar("Coca-Cola 600 ml", hiopos(filas))[:2], ("602", "ok"))
+        self.assertEqual(m.buscar("Coca-Cola 1,5 L", hiopos(filas))[:2], ("602", "ok"))
+
+    def test_bonus_pedidoya_no_aprueba_un_match_a_medias(self):
+        # 2 de 3 palabras (80%) + bonus PEDIDOYA no alcanza para verde: es otro producto
+        self.assertEqual(m.buscar("Hamburguesa doble", hiopos())[1], "revisar")
+
     def test_numeros_deben_ser_iguales(self):
         # "ALITAS X 12" no es "ALITAS X 6": el número no se tolera como falta de ortografía
         self.assertNotEqual(m.buscar("Alitas x12", hiopos())[1], "ok")
@@ -80,6 +89,10 @@ class ArticulosRepetidos(unittest.TestCase):
         self.assertEqual((cod, estado), ("401", "revisar"))  # a igualdad, el código más bajo
         self.assertIn("401", candidatos)
         self.assertIn("402", candidatos)
+
+    def test_codigo_repetido_no_tapa_un_empate(self):
+        filas = [("501", "TORTA DE CHOCLO", "COCINA"), ("501", "TORTA DE CHOCLO", "COCINA"), ("502", "TORTA DE CHOCLO", "COCINA")]
+        self.assertEqual(m.buscar("Torta de choclo", hiopos(filas))[:2], ("501", "revisar"))
 
     def test_mismo_codigo_dos_veces_no_es_empate(self):
         filas = [("501", "TORTA DE CHOCLO", "COCINA"), ("501", "TORTA DE CHOCLO", "COCINA")]
