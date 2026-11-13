@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matcheador PYA–HIOPOS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="vendor/xlsx.full.min.js"></script>
+<script src="matcher.js"></script>
+<style>
+:root {
+  --rojo: #FA0050; --rojo-osc: #C8003F; --tinta: #2B0F3A; --gris: #6E6478; --linea: #E8E3EE;
+  --fondo: #F7F5F9; --blanco: #fff;
+  --ok: #0E8A5F; --ok-bg: #E3F5EC; --rev: #A86A00; --rev-bg: #FFF2D1; --sin: #C8003F; --sin-bg: #FFE3EC;
+  --man: #5B2A86; --man-bg: #EFE6F8;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font: 15px/1.45 Figtree, system-ui, sans-serif; color: var(--tinta); background: var(--fondo); }
+button, input { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--tinta); outline-offset: 2px; }
+header { background: var(--rojo); color: #fff; position: sticky; top: 0; z-index: 5; }
+.barra { max-width: 920px; margin: auto; padding: 14px 16px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.barra h1 { font-size: 20px; font-weight: 800; margin: 0; letter-spacing: -.01em; }
+.barra .tienda { opacity: .85; font-weight: 500; }
+.barra .espacio { flex: 1; }
+.btn { border: 0; border-radius: 999px; padding: 9px 18px; font-weight: 700; cursor: pointer; }
+.btn-blanco { background: #fff; color: var(--rojo); }
+.btn-blanco:hover { background: #FFE3EC; }
+.btn-rojo { background: var(--rojo); color: #fff; }
+.btn-rojo:hover { background: var(--rojo-osc); }
+.btn-borde { background: transparent; border: 1.5px solid var(--linea); color: var(--tinta); padding: 6px 14px; }
+.btn-borde:hover { border-color: var(--tinta); }
+main { max-width: 920px; margin: auto; padding: 16px; }
+
+/* Carga */
+.carga { margin: 48px auto; max-width: 620px; text-align: center; }
+.carga h2 { font-size: clamp(28px, 5vw, 40px); line-height: 1.1; font-weight: 800; margin: 0 0 12px; letter-spacing: -.02em; }
+.carga p { color: var(--gris); margin: 0 0 28px; }
+.zona { display: block; border: 2.5px dashed #F3A6C1; background: #fff; border-radius: 24px; padding: 40px 20px; cursor: pointer; }
+.zona.encima { border-color: var(--rojo); background: #FFF0F5; }
+.zona strong { display: block; font-size: 18px; margin-bottom: 4px; }
+.zona input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.archivos { list-style: none; padding: 0; margin: 20px 0 0; display: grid; gap: 8px; text-align: left; }
+.archivos li { background: #fff; border-radius: 14px; padding: 10px 14px; display: flex; justify-content: space-between; gap: 12px; }
+.archivos .falta { color: var(--gris); }
+.archivos .esta { color: var(--ok); font-weight: 600; }
+.error { color: var(--sin); font-weight: 600; margin-top: 16px; }
+
+/* Controles */
+.controles { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 18px; }
+.pestanas { display: flex; background: #fff; border-radius: 999px; padding: 4px; }
+.pestanas button { border: 0; background: none; border-radius: 999px; padding: 8px 16px; font-weight: 700; cursor: pointer; color: var(--gris); }
+.pestanas button[aria-selected="true"] { background: var(--tinta); color: #fff; }
+.filtros { display: flex; gap: 6px; flex-wrap: wrap; }
+.filtros button { border: 1.5px solid var(--linea); background: #fff; border-radius: 999px; padding: 6px 12px; cursor: pointer; font-weight: 600; }
+.filtros button[aria-pressed="true"] { border-color: var(--tinta); }
+.filtros .n { font-variant-numeric: tabular-nums; margin-left: 4px; color: var(--gris); }
+.buscador { flex: 1; min-width: 180px; border: 1.5px solid var(--linea); border-radius: 999px; padding: 8px 16px; background: #fff; }
+
+/* Menú */
+.seccion { font-size: 22px; font-weight: 800; margin: 28px 0 10px; letter-spacing: -.01em; }
+.seccion:first-child { margin-top: 4px; }
+.item { background: #fff; border-radius: 18px; margin-bottom: 12px; overflow: hidden; }
+.item-cuerpo { display: flex; gap: 16px; padding: 16px; }
+.item-texto { flex: 1; min-width: 0; }
+.item-texto h3 { margin: 0 0 2px; font-size: 16px; font-weight: 700; }
+.item-texto p { margin: 0 0 6px; color: var(--gris); font-size: 14px; }
+.precio { font-weight: 700; }
+.item img { width: 96px; height: 96px; object-fit: cover; border-radius: 12px; flex: none; background: var(--fondo); }
+
+/* Ticket HIOPOS: el vínculo con el POS */
+.ticket { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 16px; border-top: 2px dashed var(--linea); position: relative; }
+.ticket::before, .ticket::after { content: ""; position: absolute; top: -9px; width: 16px; height: 16px; border-radius: 50%; background: var(--fondo); }
+.ticket::before { left: -8px; } .ticket::after { right: -8px; }
+.ticket.ok { background: var(--ok-bg); } .ticket.revisar { background: var(--rev-bg); }
+.ticket.sin { background: var(--sin-bg); } .ticket.manual { background: var(--man-bg); }
+.cod { font-weight: 800; font-size: 15px; font-variant-numeric: tabular-nums; min-width: 64px; }
+.hi { flex: 1; min-width: 160px; }
+.hi small { color: var(--gris); display: block; }
+.estado { font-size: 13px; font-weight: 700; border-radius: 999px; padding: 3px 10px; background: #fff; }
+.ok .estado { color: var(--ok); } .revisar .estado { color: var(--rev); } .sin .estado { color: var(--sin); } .manual .estado { color: var(--man); }
+.acciones { display: flex; gap: 6px; }
+.acciones .btn { padding: 6px 14px; font-size: 14px; }
+
+/* Opcionales */
+.grupo { padding: 4px 16px 10px; }
+.grupo h4 { margin: 10px 0 2px; font-size: 15px; }
+.grupo .regla { color: var(--gris); font-size: 13px; }
+.opcion { border-radius: 14px; margin-top: 8px; overflow: hidden; border: 1.5px solid var(--linea); }
+.opcion .ticket { border-top: 0; }
+.opcion .ticket::before, .opcion .ticket::after { display: none; }
+.opcion-nombre { font-weight: 600; padding: 10px 16px 6px; }
+.opcion-nombre span { color: var(--gris); font-weight: 400; }
+.heredado { color: var(--gris); font-size: 13px; padding: 0 16px 8px; }
+.vacio { text-align: center; color: var(--gris); padding: 48px 0; }
+
+/* Selector */
+dialog { border: 0; border-radius: 22px; padding: 0; width: min(560px, calc(100vw - 32px)); max-height: 80vh; color: var(--tinta); }
+dialog::backdrop { background: rgba(43, 15, 58, .45); }
+.dlg-cab { padding: 18px 20px 12px; border-bottom: 1px solid var(--linea); }
+.dlg-cab h2 { margin: 0 0 2px; font-size: 18px; }
+.dlg-cab p { margin: 0 0 12px; color: var(--gris); font-size: 14px; }
+.dlg-cab input { width: 100%; }
+.lista { list-style: none; margin: 0; padding: 8px; overflow: auto; max-height: 50vh; }
+.lista button { width: 100%; text-align: left; border: 0; background: none; border-radius: 12px; padding: 10px 12px; cursor: pointer; display: flex; gap: 12px; align-items: baseline; }
+.lista button:hover, .lista button:focus-visible { background: var(--fondo); }
+.lista .pct { margin-left: auto; color: var(--gris); font-variant-numeric: tabular-nums; font-size: 13px; }
+.dlg-pie { display: flex; justify-content: space-between; gap: 8px; padding: 12px 20px 16px; border-top: 1px solid var(--linea); }
+
+@media (max-width: 560px) {
+  .item img { width: 72px; height: 72px; }
+  .acciones { width: 100%; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ticket.recien { animation: marca .6s ease-out; }
+  @keyframes marca { from { filter: brightness(.9); } }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="barra">
+    <h1>Matcheador PYA–HIOPOS</h1>
+    <span class="tienda" id="tienda"></span>
+    <span class="espacio"></span>
+    <button class="btn btn-blanco" id="descargar" hidden>Descargar planillas</button>
+  </div>
+</header>
+<main>
+  <section class="carga" id="carga">
+    <h2>Juntá el menú de PedidosYa con HIOPOS</h2>
+    <p>Arrastrá las tres planillas juntas: productos y opcionales que manda PedidosYa, y el listado que sacás de HIOPOS.</p>
+    <label class="zona" id="zona">
+      <strong>Soltá los archivos acá</strong>
+      <span>o hacé clic para elegirlos</span>
+      <input type="file" id="archivo" multiple accept=".xlsx,.xls">
+    </label>
+    <ul class="archivos" id="estadoArchivos"></ul>
+    <div class="error" id="error" role="alert"></div>
+  </section>
+
+  <section id="app" hidden>
+    <div class="controles">
+      <div class="pestanas" role="tablist">
+        <button role="tab" aria-selected="true" data-vista="productos">Productos</button>
+        <button role="tab" aria-selected="false" data-vista="opcionales">Opcionales</button>
+      </div>
+      <div class="filtros" id="filtros"></div>
+      <input class="buscador" id="buscar" type="search" placeholder="Buscar por nombre o código" aria-label="Buscar por nombre o código">
+    </div>
+    <div id="lista"></div>
+  </section>
+</main>
+
+<dialog id="selector" aria-labelledby="selTitulo">
+  <div class="dlg-cab">
+    <h2 id="selTitulo">Elegí el artículo de HIOPOS</h2>
+    <p id="selNombre"></p>
+    <input class="buscador" id="selBuscar" type="search" placeholder="Buscar en HIOPOS" aria-label="Buscar en HIOPOS">
+  </div>
+  <ul class="lista" id="selLista"></ul>
+  <div class="dlg-pie">
+    <button class="btn btn-borde" id="selQuitar">Dejar sin código</button>
+    <button class="btn btn-borde" id="selCerrar">Cancelar</button>
+  </div>
+</dialog>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const plata = n => n === null || n === "" || n === undefined ? "" : "$ " + Number(n).toLocaleString("es-UY");
+const ETIQUETA = { ok: "Listo", revisar: "Revisar", "sin match": "Sin match", manual: "Confirmado" };
+const CLASE = { ok: "ok", revisar: "revisar", "sin match": "sin", manual: "manual" };
+
+const archivos = {};            // productos / opcionales / hiopos -> { nombre, hoja, filas }
+let hiopos = [], porCod = {}, prods = [], opcs = [];
+let vista = "productos", filtro = "todos", texto = "", editando = null, recien = null;
+
+/* ---------- Carga ---------- */
+function tipoDe(filas) {
+  const cab = (filas[0] || []).map(c => String(c ?? "").trim());
+  if (cab.includes("Cód. PedidosYa")) return "hiopos";
+  if (cab.includes("Nombre Opción")) return "opcionales";
+  if (cab.includes("Sección") && cab.includes("SKU")) return "productos";
+  return null;
+}
+
+async function leer(files) {
+  $("#error").textContent = "";
+  for (const f of files) {
+    try {
+      const wb = XLSX.read(await f.arrayBuffer());
+      const hoja = wb.SheetNames[0];
+      const filas = XLSX.utils.sheet_to_json(wb.Sheets[hoja], { header: 1, defval: null, raw: true });
+      const tipo = tipoDe(filas);
+      if (!tipo) { $("#error").textContent = `No reconozco "${f.name}". Tiene que ser la planilla de productos, la de opcionales o el listado HIOPOS.`; continue; }
+      archivos[tipo] = { nombre: f.name, hoja, filas };
+    } catch (e) {
+      $("#error").textContent = `No pude abrir "${f.name}": ${e.message}`;
+    }
+  }
+  pintarArchivos();
+  if (archivos.productos && archivos.opcionales && archivos.hiopos) arrancar();
+}
+
+function pintarArchivos() {
+  $("#estadoArchivos").innerHTML = [["productos", "Productos de PedidosYa"], ["opcionales", "Opcionales de PedidosYa"], ["hiopos", "Listado HIOPOS"]]
+    .map(([k, t]) => `<li><span>${t}</span>${archivos[k] ? `<span class="esta">${esc(archivos[k].nombre)}</span>` : `<span class="falta">Falta</span>`}</li>`).join("");
+}
+
+const col = (filas, nombre) => filas[0].findIndex(c => String(c ?? "").trim() === nombre);
+
+function arrancar() {
+  try {
+    hiopos = prepararHiopos(archivos.hiopos.filas);
+  } catch (e) { $("#error").textContent = e.message; return; }
+  porCod = Object.fromEntries(hiopos.map(h => [h.cod, h]));
+
+  const P = archivos.productos.filas, c = n => col(P, n);
+  prods = P.slice(1).map((r, i) => ({ fila: i + 1, r })).filter(x => x.r[c("Nombre")]).map(({ fila, r }) => ({
+    fila, seccion: r[c("Sección")], nombre: r[c("Nombre")], desc: r[c("Descripción")], precio: r[c("Precio")],
+    img: r[c("Imagen")], id: r[c("ID")], ...inicial(r[c("SKU")], r[c("Nombre")]) }));
+
+  const O = archivos.opcionales.filas, o = n => col(O, n);
+  opcs = O.slice(1).map((r, i) => ({ fila: i + 1, r })).filter(x => x.r[o("Nombre Opción")]).map(({ fila, r }) => ({
+    fila, nombre: r[o("Nombre Opción")], grupo: r[o("Grupo de opciones")], min: r[o("Cantidad mínima Grupo de opciones")],
+    max: r[o("Cantidad máxima Grupo de opciones")], precio: r[o("Precio")], idProd: r[o("ID Producto")],
+    nombreProd: r[o("Nombre Producto")], ...inicial(r[o("SKU")], r[o("Nombre Opción")]) }));
+
+  const tienda = (archivos.productos.nombre.match(/\d{4,}/) || [])[0];
+  $("#tienda").textContent = tienda ? `Tienda ${tienda}` : "";
+  $("#carga").hidden = true; $("#app").hidden = false; $("#descargar").hidden = false;
+  pintar();
+}
+
+function inicial(actual, nombre) {
+  const a = actual ? String(actual).trim() : "";
+  if (porCod[a]) return { cod: a, estado: "ok", previo: null };
+  const r = buscar(nombre, hiopos);
+  return { cod: r.cod, estado: r.estado, previo: a || null };
+}
+
+/* ---------- Vista ---------- */
+const prodDe = id => prods.find(p => p.id === id);
+const estadoOpc = o => o.estado;
+function coincide(x) {
+  const h = porCod[x.cod];
+  const t = texto.toLowerCase();
+  const pasaTexto = !t || [x.nombre, x.cod, h?.nombre, x.nombreProd, x.seccion].some(v => String(v ?? "").toLowerCase().includes(t));
+  const est = vista === "opcionales" ? estadoOpc(x) : x.estado;
+  return pasaTexto && (filtro === "todos" || est === filtro);
+}
+
+function ticket(x, clave, soloLectura) {
+  const h = porCod[x.cod];
+  const cls = CLASE[x.estado] + (recien === clave ? " recien" : "");
+  const hi = h ? `<b>${esc(h.nombre)}</b><small>Familia ${esc(h.familia)}${h.precio !== "" && h.precio != null ? ", precio HIOPOS " + plata(h.precio) : ""}</small>`
+               : `<b>Sin artículo de HIOPOS</b><small>${x.previo ? `Traía "${esc(x.previo)}", que no existe en HIOPOS` : "Elegí uno a mano"}</small>`;
+  const acc = soloLectura ? "" : `<div class="acciones">
+      ${x.estado === "revisar" ? `<button class="btn btn-rojo" data-confirmar="${clave}">Confirmar</button>` : ""}
+      <button class="btn btn-borde" data-cambiar="${clave}">${x.cod ? "Cambiar" : "Elegir"}</button></div>`;
+  return `<div class="ticket ${cls}"><span class="cod">${esc(x.cod || "—")}</span><div class="hi">${hi}</div>
+    <span class="estado">${ETIQUETA[x.estado]}</span>${acc}</div>`;
+}
+
+function pintar() {
+  const items = vista === "productos" ? prods : opcs;
+  const cuenta = k => items.filter(x => k === "todos" || x.estado === k).length;
+  $("#filtros").innerHTML = [["todos", "Todo"], ["revisar", "Revisar"], ["sin match", "Sin match"], ["ok", "Listo"], ["manual", "Confirmado"]]
+    .map(([k, t]) => `<button aria-pressed="${filtro === k}" data-filtro="${k}">${t}<span class="n">${cuenta(k)}</span></button>`).join("");
+
+  const visibles = items.filter(coincide);
+  if (!visibles.length) { $("#lista").innerHTML = `<p class="vacio">No hay ${vista} con este filtro.</p>`; return; }
+
+  let html = "", ultimo = null;
+  if (vista === "productos") {
+    for (const p of visibles) {
+      if (p.seccion !== ultimo) { html += `<h2 class="seccion">${esc(p.seccion)}</h2>`; ultimo = p.seccion; }
+      html += `<article class="item"><div class="item-cuerpo"><div class="item-texto"><h3>${esc(p.nombre)}</h3>
+        ${p.desc ? `<p>${esc(p.desc)}</p>` : ""}<span class="precio">${plata(p.precio)}</span></div>
+        ${p.img ? `<img src="${esc(p.img)}" alt="" loading="lazy" onerror="this.remove()">` : ""}</div>
+        ${ticket(p, "p" + p.fila)}</article>`;
+    }
+  } else {
+    const porProd = new Map();
+    for (const o of visibles) (porProd.get(o.idProd) || porProd.set(o.idProd, []).get(o.idProd)).push(o);
+    for (const [id, lista] of porProd) {
+      const p = prodDe(id);
+      html += `<article class="item"><div class="item-cuerpo"><div class="item-texto"><h3>${esc(lista[0].nombreProd)}</h3></div>
+        ${p?.img ? `<img src="${esc(p.img)}" alt="" loading="lazy" onerror="this.remove()">` : ""}</div>
+        <p class="heredado">El código del producto se toma de la pestaña Productos.</p>
+        ${ticket(p || { cod: null, estado: "sin match" }, "", true)}`;
+      let grupo = null;
+      for (const o of lista) {
+        if (o.grupo !== grupo) {
+          if (grupo !== null) html += "</div>";
+          const regla = [o.min ? `mínimo ${o.min}` : "", o.max ? `hasta ${o.max}` : ""].filter(Boolean).join(", ");
+          html += `<div class="grupo"><h4>${esc(o.grupo)}</h4>${regla ? `<span class="regla">Elegí ${regla}</span>` : ""}`;
+          grupo = o.grupo;
+        }
+        html += `<div class="opcion"><div class="opcion-nombre">${esc(o.nombre)}
+          ${o.precio ? `<span>+ ${plata(o.precio)}</span>` : ""}</div>${ticket(o, "o" + o.fila)}</div>`;
+      }
+      html += "</div></article>";
+    }
+  }
+  $("#lista").innerHTML = html;
+  recien = null;
+}
+
+const itemDe = clave => clave[0] === "p" ? prods.find(p => p.fila == clave.slice(1)) : opcs.find(o => o.fila == clave.slice(1));
+
+function asignar(clave, cod) {
+  const x = itemDe(clave);
+  const mismos = clave[0] === "o"   // la misma opción repetida en varios productos se resuelve de una vez
+    ? opcs.filter(o => o === x || (o.estado !== "manual" && String(o.nombre).trim().toLowerCase() === String(x.nombre).trim().toLowerCase()))
+    : [x];
+  for (const o of mismos) { o.cod = cod; o.estado = cod ? "manual" : "sin match"; }
+  recien = clave;
+  pintar();
+}
+
+/* ---------- Selector ---------- */
+let rankingActual = [];
+function abrirSelector(clave) {
+  editando = clave;
+  const x = itemDe(clave);
+  rankingActual = ranking(x.nombre, hiopos);
+  $("#selNombre").textContent = `Para "${x.nombre}"` + (clave[0] === "o" ? ". Se aplica a todas las opciones con este nombre que no confirmaste." : "");
+  $("#selBuscar").value = "";
+  pintarSelector();
+  $("#selector").showModal();
+  $("#selBuscar").focus();
+}
+function pintarSelector() {
+  const t = $("#selBuscar").value.toLowerCase();
+  const lista = rankingActual.filter(({ h }) => !t || `${h.cod} ${h.nombre} ${h.familia}`.toLowerCase().includes(t)).slice(0, 40);
+  $("#selLista").innerHTML = lista.length ? lista.map(({ h, p }) => `<li><button data-elegir="${esc(h.cod)}">
+      <span class="cod">${esc(h.cod)}</span><span><b>${esc(h.nombre)}</b><br><small>Familia ${esc(h.familia)}${h.precio !== "" && h.precio != null ? ", precio " + plata(h.precio) : ""}</small></span>
+      <span class="pct">${Math.round(Math.min(p, 1) * 100)}%</span></button></li>`).join("")
+    : `<li class="vacio">Nada en HIOPOS con "${esc(t)}".</li>`;
+}
+
+/* ---------- Descarga ---------- */
+function descargar() {
+  const pendientes = [...prods, ...opcs].filter(x => x.estado === "revisar" || x.estado === "sin match").length;
+  if (pendientes && !confirm(`Quedan ${pendientes} filas para revisar o sin código. ¿Descargar igual?`)) return;
+  const P = archivos.productos.filas.map(r => [...r]), cP = col(P, "SKU");
+  for (const p of prods) P[p.fila][cP] = p.cod;
+  const O = archivos.opcionales.filas.map(r => [...r]), cSP = col(O, "SKU Producto"), cS = col(O, "SKU");
+  for (const o of opcs) { O[o.fila][cSP] = prodDe(o.idProd)?.cod ?? null; O[o.fila][cS] = o.cod; }
+  for (const [filas, a] of [[P, archivos.productos], [O, archivos.opcionales]]) {
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(filas), a.hoja);
+    XLSX.writeFile(wb, a.nombre.replace(/\.xls$/i, ".xlsx"));
+  }
+}
+
+/* ---------- Eventos ---------- */
+const zona = $("#zona");
+$("#archivo").addEventListener("change", e => leer(e.target.files));
+["dragenter", "dragover"].forEach(ev => zona.addEventListener(ev, e => { e.preventDefault(); zona.classList.add("encima"); }));
+["dragleave", "drop"].forEach(ev => zona.addEventListener(ev, e => { e.preventDefault(); zona.classList.remove("encima"); }));
+zona.addEventListener("drop", e => leer(e.dataTransfer.files));
+document.querySelectorAll("[data-vista]").forEach(b => b.addEventListener("click", () => {
+  vista = b.dataset.vista;
+  document.querySelectorAll("[data-vista]").forEach(x => x.setAttribute("aria-selected", x === b));
+  pintar();
+}));
+$("#filtros").addEventListener("click", e => { const b = e.target.closest("[data-filtro]"); if (b) { filtro = b.dataset.filtro; pintar(); } });
+$("#buscar").addEventListener("input", e => { texto = e.target.value; pintar(); });
+$("#lista").addEventListener("click", e => {
+  const c = e.target.closest("[data-cambiar]"), k = e.target.closest("[data-confirmar]");
+  if (c) abrirSelector(c.dataset.cambiar);
+  if (k) asignar(k.dataset.confirmar, itemDe(k.dataset.confirmar).cod);
+});
+$("#selBuscar").addEventListener("input", pintarSelector);
+$("#selLista").addEventListener("click", e => { const b = e.target.closest("[data-elegir]"); if (b) { $("#selector").close(); asignar(editando, b.dataset.elegir); } });
+$("#selQuitar").addEventListener("click", () => { $("#selector").close(); asignar(editando, null); });
+$("#selCerrar").addEventListener("click", () => $("#selector").close());
+$("#descargar").addEventListener("click", descargar);
+pintarArchivos();
+</script>
+</body>
+</html>
