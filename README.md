@@ -12,6 +12,12 @@ Abrí `Para tecnicos/Matcheador.html` con doble clic. Es un solo archivo, no nec
 
 Colores: verde = listo, amarillo = revisar, rojo = sin match, violeta = confirmado a mano.
 
+## Versión web
+
+La herramienta se publica sola en GitHub Pages cada vez que se mergea algo a `main` (`.github/workflows/publicar.yml`). El link es fijo, se puede pasar a cualquiera y siempre abre la última versión.
+
+Para sacar una versión nueva: agregá arriba de todo en `CHANGELOG.md` un `## X.Y.Z — fecha` con los cambios en `- `. Eso es lo que se ve en el panel "Novedades" de la app, y al publicarse se crea la etiqueta `vX.Y.Z` en git.
+
 ## Cómo matchea
 
 Compara nombres palabra por palabra, ignorando acentos, mayúsculas, medidas ("600 g") y relleno ("más", "con", "para"), y tolera faltas de ortografía. Ante empate prefiere la familia `PEDIDOYA` y después el código más bajo. Los SKU que ya existen en HIOPOS se respetan. El `SKU Producto` de los opcionales se toma del producto.
@@ -23,7 +29,8 @@ Para casos que no reconoce, agregar variantes en `SINONIMOS` / `RELLENO`.
 | Archivo | Qué es |
 |---|---|
 | `matcheador.html` + `matcher.js` | Pantalla (fuente). |
-| `empaquetar.py` | Arma `Para tecnicos/Matcheador.html` incrustando `matcher.js` y `vendor/xlsx.full.min.js` (SheetJS 0.18.5). Correrlo tras cada cambio. |
+| `empaquetar.py` | Arma `Para tecnicos/Matcheador.html` incrustando `matcher.js`, `vendor/xlsx.full.min.js` (SheetJS 0.18.5) y las novedades de `CHANGELOG.md`. Correrlo tras cada cambio. |
+| `CHANGELOG.md` | Versiones y novedades. |
 | `matcheador.py` + `ejecutar.bat` | Versión por consola: lee `Recibidos PYA/` y `Listado HIOPOS/`, escribe en `Salida/`. |
 | `test_matcheador.py` | Compara la salida contra `Enviados PYA/` (lo que se envió a mano). |
 | `test_matcher.js` | Verifica que `matcher.js` y `matcheador.py` den lo mismo. |
