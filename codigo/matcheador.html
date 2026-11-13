@@ -30,6 +30,11 @@ header { background: var(--rojo); color: #fff; position: sticky; top: 0; z-index
 .novedades h3 { font-size: 14px; margin: 12px 0 4px; }
 .novedades ul { margin: 0; padding-left: 18px; }
 .novedades p { margin: 0 0 8px; }
+.ayuda summary { list-style: none; background: #fff; color: var(--rojo); border-radius: 999px; padding: 9px 18px; font-size: 15px; font-weight: 700; opacity: 1; }
+.ayuda summary::-webkit-details-marker { display: none; }
+.ayuda > div { left: auto; right: 0; top: 48px; width: min(440px, 92vw); max-height: 75vh; font-size: 15px; line-height: 1.55; padding: 8px 22px 14px; }
+.ayuda h3 { font-size: 16px; margin: 16px 0 6px; }
+.ayuda li { margin-bottom: 4px; }
 .btn { border: 0; border-radius: 999px; padding: 9px 18px; font-weight: 700; cursor: pointer; }
 .btn-blanco { background: #fff; color: var(--rojo); }
 .btn-blanco:hover { background: #FFE3EC; }
@@ -129,7 +134,10 @@ dialog::backdrop { background: rgba(43, 15, 58, .45); }
   <div class="barra">
     <h1>Matcheador PYA–HIOPOS</h1>
     <!--NOVEDADES-->
-    <details class="novedades"><summary>¿Cómo funciona?</summary><div>
+    <span class="tienda" id="tienda"></span>
+    <span class="espacio"></span>
+    <button class="btn btn-blanco" id="descargar" hidden>Descargar planillas</button>
+    <details class="novedades ayuda"><summary>¿Cómo funciona?</summary><div>
       <h3>1. Soltá las planillas</h3><p>Arrastrá las tres juntas: <b>productos</b> y <b>opcionales</b> de PedidosYa, y el <b>listado de HIOPOS</b>. Las reconoce por su contenido, no por el nombre. No se suben a ningún lado.</p>
       <h3>2. Revisá por colores</h3><ul>
         <li><b>Verde · Listo:</b> match seguro, no hay que tocar nada.</li>
@@ -141,9 +149,6 @@ dialog::backdrop { background: rgba(43, 15, 58, .45); }
       <h3>4. Revisá los opcionales</h3><p>Están agrupados por producto. Cada opcional se elige una vez: corregir "Mayonesa" corrige todas las de la carta.</p>
       <h3>5. Descargá</h3><p>Tocá <b>Descargar planillas</b> y enviá a PedidosYa los dos archivos con los SKU completos.</p>
     </div></details>
-    <span class="tienda" id="tienda"></span>
-    <span class="espacio"></span>
-    <button class="btn btn-blanco" id="descargar" hidden>Descargar planillas</button>
   </div>
 </header>
 <main>
