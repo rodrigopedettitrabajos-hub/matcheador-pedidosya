@@ -3,6 +3,7 @@ name: Armar .exe
 on:
   push:
     branches: [main]
+  pull_request:      # probar que arma antes de mergear
   workflow_dispatch:
 
 permissions:
