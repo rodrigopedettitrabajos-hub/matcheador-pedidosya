@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
+      url: ${{ steps.deploy.outputs.page_url || steps.deploy2.outputs.page_url || steps.deploy3.outputs.page_url || steps.deploy4.outputs.page_url || steps.deploy5.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - name: Probar las reglas de la pantalla antes de publicar
@@ -28,7 +28,32 @@ jobs:
       - run: mkdir _site && cp "Para tecnicos/Matcheador.html" _site/index.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
+      # GitHub Pages a veces falla un rato de su lado ("Fetching artifact metadata failed"): reintenta solo, ~40 min en total
       - id: deploy
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+      - if: steps.deploy.outcome == 'failure'
+        run: sleep 120
+      - id: deploy2
+        if: steps.deploy.outcome == 'failure'
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+      - if: steps.deploy2.outcome == 'failure'
+        run: sleep 300
+      - id: deploy3
+        if: steps.deploy2.outcome == 'failure'
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+      - if: steps.deploy3.outcome == 'failure'
+        run: sleep 600
+      - id: deploy4
+        if: steps.deploy3.outcome == 'failure'
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+      - if: steps.deploy4.outcome == 'failure'
+        run: sleep 1200
+      - id: deploy5
+        if: steps.deploy4.outcome == 'failure'
         uses: actions/deploy-pages@v4
       - name: Etiquetar versión
         run: |
