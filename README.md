@@ -63,7 +63,7 @@ Para casos que no reconoce, agregar variantes en `SINONIMOS` / `RELLENO`.
 |---|---|
 | `Para tecnicos/Matcheador.html` | La herramienta lista para usar (se genera, no editar). |
 | `CHANGELOG.md` | Versiones y novedades. |
-| `ejecutar.bat` | Versión por consola: lee `planillas/Recibidos PYA/` y `planillas/Listado HIOPOS/`, escribe en `planillas/Salida/`. |
+| `Matcheador.exe` | Versión por consola, sin instalar Python: bajarlo de [Releases](https://github.com/rodrigopedettitrabajos-hub/matcheador-pedidosya/releases/latest), ponerlo al lado de la carpeta `planillas/` y hacer doble clic. Lee `planillas/Recibidos PYA/` y `planillas/Listado HIOPOS/`, escribe en `planillas/Salida/`. |
 | `planillas/` | Planillas de clientes para la consola y los tests. No se suben al repo y se pueden borrar cuando quieras. |
 | `docs/` | Presentación (`Presentacion Matcheador.pdf`, se genera desde `presentacion.html` imprimiéndolo con Edge/Chrome) y capturas. |
 | `codigo/matcheador.html` + `codigo/matcher.js` | Pantalla (fuente). |
@@ -78,4 +78,4 @@ Para casos que no reconoce, agregar variantes en `SINONIMOS` / `RELLENO`.
 
 Las planillas de clientes no están en el repo (`.gitignore`). Para correr los tests, poné una tienda de ejemplo en `planillas/Recibidos PYA/`, `planillas/Enviados PYA/` y `planillas/Listado HIOPOS/`.
 
-Requisitos para desarrollar: Python 3 con `openpyxl`, y Node.
+Requisitos para desarrollar: Python 3 con `openpyxl`, y Node. El `.exe` lo arma GitHub en cada cambio a main (`.github/workflows/exe.yml`); a mano: `pip install pyinstaller` y `pyinstaller --onefile --name Matcheador codigo/matcheador.py`.
