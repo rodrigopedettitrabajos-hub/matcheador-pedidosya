@@ -1,4 +1,4 @@
-# Arma Matcheador.exe (la consola, sin instalar Python) y lo sube a la versión de CHANGELOG.md en Releases.
+# Arma Matcheador.exe (abre la pantalla en el navegador) y lo sube a la versión de CHANGELOG.md en Releases.
 name: Armar .exe
 on:
   push:
@@ -17,8 +17,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install pyinstaller openpyxl
-      - run: pyinstaller --onefile --name Matcheador codigo/matcheador.py
+      - run: pip install pyinstaller
+      - run: python codigo/empaquetar.py
+      - run: pyinstaller --onefile --noconsole --name Matcheador --add-data "Para tecnicos/Matcheador.html;." codigo/abrir.py
       - uses: actions/upload-artifact@v4
         with:
           name: Matcheador
@@ -30,4 +31,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           v="v$(grep -m1 '^## ' CHANGELOG.md | cut -d' ' -f2)"
-          gh release upload "$v" dist/Matcheador.exe --clobber || gh release create "$v" dist/Matcheador.exe --title "$v" --notes "Doble clic en Matcheador.exe, con la carpeta planillas al lado."
+          gh release upload "$v" dist/Matcheador.exe --clobber || gh release create "$v" dist/Matcheador.exe --title "$v" --notes "Doble clic en Matcheador.exe: abre el matcheador en el navegador."

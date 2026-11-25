@@ -2,6 +2,9 @@
 
 Cada cambio que se publica suma una versión arriba de todo. La primera línea `## X.Y.Z` es la versión que muestra la app y la que se etiqueta en git.
 
+## 1.5.1 — 2026-11-25
+- `Matcheador.exe` ahora abre la pantalla del matcheador en el navegador: cargás los archivos ahí, sin carpetas preparadas.
+
 ## 1.5.0 — 2026-11-25
 - La consola ahora es `Matcheador.exe`: doble clic y listo, sin instalar Python. Reemplaza a `ejecutar.bat`.
 
