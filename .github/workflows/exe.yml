@@ -1,0 +1,33 @@
+# Arma Matcheador.exe (la consola, sin instalar Python) y lo sube a la versión de CHANGELOG.md en Releases.
+name: Armar .exe
+on:
+  push:
+    branches: [main]
+  pull_request:      # probar que arma antes de mergear
+  workflow_dispatch:
+
+permissions:
+  contents: write   # crear la versión y subir el .exe
+
+jobs:
+  exe:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyinstaller openpyxl
+      - run: pyinstaller --onefile --name Matcheador codigo/matcheador.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Matcheador
+          path: dist/Matcheador.exe
+      - name: Subir a Releases
+        if: github.ref == 'refs/heads/main'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          v="v$(grep -m1 '^## ' CHANGELOG.md | cut -d' ' -f2)"
+          gh release upload "$v" dist/Matcheador.exe --clobber || gh release create "$v" dist/Matcheador.exe --title "$v" --notes "Doble clic en Matcheador.exe, con la carpeta planillas al lado."

@@ -2,6 +2,9 @@
 
 Cada cambio que se publica suma una versión arriba de todo. La primera línea `## X.Y.Z` es la versión que muestra la app y la que se etiqueta en git.
 
+## 1.5.0 — 2026-11-25
+- La consola ahora es `Matcheador.exe`: doble clic y listo, sin instalar Python. Reemplaza a `ejecutar.bat`.
+
 ## 1.4.0 — 2026-11-13
 - "¿Cómo funciona?" se puede ampliar a pantalla completa, con letra más grande.
 - Más seguro: una medida distinta ("600 ml" contra "1.5 L") ya no queda en verde.

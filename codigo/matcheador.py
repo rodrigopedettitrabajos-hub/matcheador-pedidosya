@@ -1,6 +1,6 @@
 """Rellena los SKU de las planillas de PedidosYa con los códigos del listado HIOPOS.
 
-Uso: python codigo/matcheador.py  (o doble clic en ejecutar.bat)
+Uso: python codigo/matcheador.py  (o doble clic en Matcheador.exe, al lado de "planillas")
 Lee "planillas/Recibidos PYA/productos-*.xlsx" y "opcionales-*.xlsx", el primer archivo de "planillas/Listado HIOPOS"
 y escribe las planillas completas en "planillas/Salida/".
 Celdas amarillas = revisar (match dudoso o con varios candidatos, ver comentario). Rojas = sin match.
@@ -12,7 +12,8 @@ import openpyxl
 from openpyxl.comments import Comment
 from openpyxl.styles import PatternFill
 
-BASE = Path(__file__).parent.parent / "planillas"  # Recibidos PYA, Listado HIOPOS, Salida, Enviados PYA
+# Recibidos PYA, Listado HIOPOS, Salida, Enviados PYA. Como .exe, "planillas" va al lado del .exe
+BASE = (Path(sys.executable).parent if getattr(sys, "frozen", False) else Path(__file__).parent.parent) / "planillas"
 AMARILLO = PatternFill("solid", fgColor="FFFF00")
 ROJO = PatternFill("solid", fgColor="FF8080")
 OK_MIN, REVISAR_MIN, EMPATE, BONO_PEDIDOYA = 0.9, 0.6, 0.03, 0.1
@@ -171,4 +172,13 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    if not getattr(sys, "frozen", False):
+        main()
+    else:  # doble clic en el .exe: mostrar el resultado o el error antes de que se cierre la ventana
+        try:
+            main()
+        except SystemExit as e:
+            print(e.code)
+        except Exception as e:
+            print(f"Error: {e}")
+        input("\nEnter para cerrar...")
