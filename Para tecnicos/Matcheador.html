@@ -79,6 +79,9 @@ function similitud(a, b) {
   return a.length || b.length ? 2 * comunes / (a.length + b.length) : 0;
 }
 
+// Formato de los códigos de HIOPOS: "Número-Número" (ej. 123-45), con o sin espacios en el guion
+const codigoValido = c => /^\d+\s*-\s*\d+$/.test(String(c ?? "").trim());
+
 const numCod = h => parseInt(h.cod.split("-")[0], 10) || 0;
 
 function ranking(nombre, hiopos) {
@@ -105,7 +108,7 @@ function prepararHiopos(filas) {
     precio: r[iPre], tokens: normalizar(r[iNom]) }));
 }
 
-if (typeof module !== "undefined") module.exports = { normalizar, similitud, buscar, ranking, prepararHiopos };
+if (typeof module !== "undefined") module.exports = { codigoValido, normalizar, similitud, buscar, ranking, prepararHiopos };
 
 </script>
 <style>
@@ -240,7 +243,7 @@ dialog::backdrop { background: rgba(43, 15, 58, .45); }
 <header>
   <div class="barra">
     <h1>Matcheador PYA–HIOPOS</h1>
-    <details class="novedades"><summary>v1.5.2 · Novedades</summary><div><h3>1.5.2 — 2026-11-26</h3><ul><li>Ícono propio en rojo PedidosYa: se ve en la pestaña del navegador y en `Matcheador.exe`.</li></ul><h3>1.5.1 — 2026-11-25</h3><ul><li>`Matcheador.exe` ahora abre la pantalla del matcheador en el navegador: cargás los archivos ahí, sin carpetas preparadas.</li></ul><h3>1.5.0 — 2026-11-25</h3><ul><li>La consola ahora es `Matcheador.exe`: doble clic y listo, sin instalar Python. Reemplaza a `ejecutar.bat`.</li></ul><h3>1.4.0 — 2026-11-13</h3><ul><li>&quot;¿Cómo funciona?&quot; se puede ampliar a pantalla completa, con letra más grande.</li><li>Más seguro: una medida distinta (&quot;600 ml&quot; contra &quot;1.5 L&quot;) ya no queda en verde.</li><li>Un parecido a medias ya no queda en verde solo por ser de la familia PEDIDOYA: pasa a Revisar.</li><li>Si HIOPOS tiene el mismo código repetido y otro artículo igual, ahora avisa el empate.</li><li>Carga más rápida con cartas grandes.</li></ul><h3>1.3.2 — 2026-11-13</h3><ul><li>&quot;¿Cómo funciona?&quot; pasa a la derecha, como botón, con letra más grande.</li><li>El tutorial muestra capturas de cada paso, hechas con una tienda inventada.</li></ul><h3>1.3.1 — 2026-11-13</h3><ul><li>Carpeta más ordenada: el código va en `codigo/` y las planillas de clientes en `planillas/`.</li></ul><h3>1.3.0 — 2026-11-13</h3><ul><li>Botón &quot;¿Cómo funciona?&quot; con el tutorial de uso.</li></ul><h3>1.2.0 — 2026-11-13</h3><ul><li>La herramienta se puede abrir desde la web, sin pasar el archivo.</li><li>Número de versión y panel de Novedades en la pantalla.</li></ul><h3>1.1.0 — 2026-11-13</h3><ul><li>Leyenda para los artículos que no tienen match.</li><li>Presentación de la herramienta en PDF.</li></ul><h3>1.0.0 — 2026-11-13</h3><ul><li>Primera versión: completa los SKU de productos y opcionales de PedidosYa con el listado HIOPOS.</li></ul></div></details>
+    <details class="novedades"><summary>v1.6.0 · Novedades</summary><div><h3>1.6.0 — 2026-11-26</h3><ul><li>Antes de descargar las planillas revisa que todos los códigos tengan el formato Número-Número (ej. 123-45). Si alguno no cumple, avisa cuáles y no descarga hasta corregirlos.</li></ul><h3>1.5.2 — 2026-11-26</h3><ul><li>Ícono propio en rojo PedidosYa: se ve en la pestaña del navegador y en `Matcheador.exe`.</li></ul><h3>1.5.1 — 2026-11-25</h3><ul><li>`Matcheador.exe` ahora abre la pantalla del matcheador en el navegador: cargás los archivos ahí, sin carpetas preparadas.</li></ul><h3>1.5.0 — 2026-11-25</h3><ul><li>La consola ahora es `Matcheador.exe`: doble clic y listo, sin instalar Python. Reemplaza a `ejecutar.bat`.</li></ul><h3>1.4.0 — 2026-11-13</h3><ul><li>&quot;¿Cómo funciona?&quot; se puede ampliar a pantalla completa, con letra más grande.</li><li>Más seguro: una medida distinta (&quot;600 ml&quot; contra &quot;1.5 L&quot;) ya no queda en verde.</li><li>Un parecido a medias ya no queda en verde solo por ser de la familia PEDIDOYA: pasa a Revisar.</li><li>Si HIOPOS tiene el mismo código repetido y otro artículo igual, ahora avisa el empate.</li><li>Carga más rápida con cartas grandes.</li></ul><h3>1.3.2 — 2026-11-13</h3><ul><li>&quot;¿Cómo funciona?&quot; pasa a la derecha, como botón, con letra más grande.</li><li>El tutorial muestra capturas de cada paso, hechas con una tienda inventada.</li></ul><h3>1.3.1 — 2026-11-13</h3><ul><li>Carpeta más ordenada: el código va en `codigo/` y las planillas de clientes en `planillas/`.</li></ul><h3>1.3.0 — 2026-11-13</h3><ul><li>Botón &quot;¿Cómo funciona?&quot; con el tutorial de uso.</li></ul><h3>1.2.0 — 2026-11-13</h3><ul><li>La herramienta se puede abrir desde la web, sin pasar el archivo.</li><li>Número de versión y panel de Novedades en la pantalla.</li></ul><h3>1.1.0 — 2026-11-13</h3><ul><li>Leyenda para los artículos que no tienen match.</li><li>Presentación de la herramienta en PDF.</li></ul><h3>1.0.0 — 2026-11-13</h3><ul><li>Primera versión: completa los SKU de productos y opcionales de PedidosYa con el listado HIOPOS.</li></ul></div></details>
     <span class="tienda" id="tienda"></span>
     <span class="espacio"></span>
     <button class="btn btn-blanco" id="descargar" hidden>Descargar planillas</button>
@@ -480,6 +483,8 @@ function pintarSelector() {
 
 /* ---------- Descarga ---------- */
 function descargar() {
+  const malos = [...new Set([...prods, ...opcs].map(x => x.cod).filter(c => c && !codigoValido(c)))];
+  if (malos.length) return alert(`No se descarga: estos códigos no tienen el formato Número-Número (ej. 123-45). Corregilos y volvé a descargar.\n\n${malos.join("\n")}`);
   const pendientes = [...prods, ...opcs].filter(x => x.estado === "revisar" || x.estado === "sin match").length;
   if (pendientes && !confirm(`Quedan ${pendientes} filas para revisar o sin código. ¿Descargar igual?`)) return;
   const P = archivos.productos.filas.map(r => [...r]), cP = col(P, "SKU");

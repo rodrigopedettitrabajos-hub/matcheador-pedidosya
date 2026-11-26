@@ -44,6 +44,9 @@ function similitud(a, b) {
   return a.length || b.length ? 2 * comunes / (a.length + b.length) : 0;
 }
 
+// Formato de los códigos de HIOPOS: "Número-Número" (ej. 123-45), con o sin espacios en el guion
+const codigoValido = c => /^\d+\s*-\s*\d+$/.test(String(c ?? "").trim());
+
 const numCod = h => parseInt(h.cod.split("-")[0], 10) || 0;
 
 function ranking(nombre, hiopos) {
@@ -70,4 +73,4 @@ function prepararHiopos(filas) {
     precio: r[iPre], tokens: normalizar(r[iNom]) }));
 }
 
-if (typeof module !== "undefined") module.exports = { normalizar, similitud, buscar, ranking, prepararHiopos };
+if (typeof module !== "undefined") module.exports = { codigoValido, normalizar, similitud, buscar, ranking, prepararHiopos };

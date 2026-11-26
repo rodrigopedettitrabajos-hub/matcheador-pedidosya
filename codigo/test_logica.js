@@ -37,4 +37,6 @@ const torta = [["501", "TORTA DE CHOCLO", "COCINA"], ["501", "TORTA DE CHOCLO", 
 assert.deepStrictEqual(da("Torta de choclo", torta), ["501", "ok"], "mismo código dos veces no es empate");
 assert.deepStrictEqual(da("Torta de choclo", [...torta, ["502", "TORTA DE CHOCLO", "COCINA"]]), ["501", "revisar"], "código repetido no tapa un empate");
 
-console.log(`OK: ${casos.length + 5} casos de matcher.js`);
+for (const c of ["123-45", "123 - 45", " 7-1 "]) assert.ok(m.codigoValido(c), c);
+for (const c of ["123", "123-", "-45", "12-3-4", "A12-3", "123/45", "", null]) assert.ok(!m.codigoValido(c), String(c));
+console.log(`OK: ${casos.length + 6} casos de matcher.js`);

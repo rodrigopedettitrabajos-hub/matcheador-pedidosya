@@ -381,6 +381,8 @@ function pintarSelector() {
 
 /* ---------- Descarga ---------- */
 function descargar() {
+  const malos = [...new Set([...prods, ...opcs].map(x => x.cod).filter(c => c && !codigoValido(c)))];
+  if (malos.length) return alert(`No se descarga: estos códigos no tienen el formato Número-Número (ej. 123-45). Corregilos y volvé a descargar.\n\n${malos.join("\n")}`);
   const pendientes = [...prods, ...opcs].filter(x => x.estado === "revisar" || x.estado === "sin match").length;
   if (pendientes && !confirm(`Quedan ${pendientes} filas para revisar o sin código. ¿Descargar igual?`)) return;
   const P = archivos.productos.filas.map(r => [...r]), cP = col(P, "SKU");
