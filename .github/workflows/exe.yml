@@ -19,7 +19,7 @@ jobs:
           python-version: "3.12"
       - run: pip install pyinstaller
       - run: python codigo/empaquetar.py
-      - run: pyinstaller --onefile --noconsole --name Matcheador --add-data "Para tecnicos/Matcheador.html;." codigo/abrir.py
+      - run: pyinstaller --onefile --noconsole --name Matcheador --icon codigo/icono.ico --add-data "Para tecnicos/Matcheador.html;." codigo/abrir.py
       - uses: actions/upload-artifact@v4
         with:
           name: Matcheador

@@ -2,6 +2,9 @@
 
 Cada cambio que se publica suma una versión arriba de todo. La primera línea `## X.Y.Z` es la versión que muestra la app y la que se etiqueta en git.
 
+## 1.5.2 — 2026-11-26
+- Ícono propio en rojo PedidosYa: se ve en la pestaña del navegador y en `Matcheador.exe`.
+
 ## 1.5.1 — 2026-11-25
 - `Matcheador.exe` ahora abre la pantalla del matcheador en el navegador: cargás los archivos ahí, sin carpetas preparadas.
 
