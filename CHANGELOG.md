@@ -2,6 +2,10 @@
 
 Cada cambio que se publica suma una versión arriba de todo. La primera línea `## X.Y.Z` es la versión que muestra la app y la que se etiqueta en git.
 
+## 1.6.0 — 2026-11-26
+- Antes de descargar las planillas revisa que todos los códigos tengan el formato Número-Número (ej. 123-45). Si alguno no cumple, avisa cuáles y no descarga hasta corregirlos.
+- Las columnas SKU se descargan en formato texto, tal cual el código: Excel ya no convierte "2-2" en fecha.
+
 ## 1.5.2 — 2026-11-26
 - Ícono propio en rojo PedidosYa: se ve en la pestaña del navegador y en `Matcheador.exe`.
 

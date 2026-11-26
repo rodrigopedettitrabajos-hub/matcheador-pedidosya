@@ -381,6 +381,8 @@ function pintarSelector() {
 
 /* ---------- Descarga ---------- */
 function descargar() {
+  const malos = [...new Set([...prods, ...opcs].map(x => x.cod).filter(c => c && !codigoValido(c)))];
+  if (malos.length) return alert(`No se descarga: estos códigos no tienen el formato Número-Número (ej. 123-45). Corregilos y volvé a descargar.\n\n${malos.join("\n")}`);
   const pendientes = [...prods, ...opcs].filter(x => x.estado === "revisar" || x.estado === "sin match").length;
   if (pendientes && !confirm(`Quedan ${pendientes} filas para revisar o sin código. ¿Descargar igual?`)) return;
   const P = archivos.productos.filas.map(r => [...r]), cP = col(P, "SKU");
@@ -392,6 +394,11 @@ function descargar() {
     ...(o.cod ? [] : [[O, o.fila, cS]]), ...(prodDe(o.idProd)?.cod ? [] : [[O, o.fila, cSP]])])];
   for (const [filas, a] of [[P, archivos.productos], [O, archivos.opcionales]]) {
     const wb = XLSX.utils.book_new(), ws = XLSX.utils.aoa_to_sheet(filas);
+    // SKU como texto ("@"): así Excel no convierte "2-2" en fecha
+    for (const c of filas === P ? [cP] : [cSP, cS]) for (let r = 1; r < filas.length; r++) {
+      const ref = XLSX.utils.encode_cell({ r, c });
+      if (ws[ref]) ws[ref] = { t: "s", v: String(ws[ref].v), z: "@" };
+    }
     for (const [f, r, c] of sinCod) if (f === filas) ws[XLSX.utils.encode_cell({ r, c })] = { t: "z", c: [{ a: "Matcheador", t: `Sin artículo de HIOPOS. ${LEYENDA}` }] };
     XLSX.utils.book_append_sheet(wb, ws, a.hoja);
     XLSX.writeFile(wb, a.nombre.replace(/\.xls$/i, ".xlsx"));
